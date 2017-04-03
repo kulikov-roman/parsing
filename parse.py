@@ -4,9 +4,11 @@ import sys
 import re
 
 
-#def scrape():
-    #create_parser()
-    #request = get_res()
+def scrape():
+    create_parser()
+    input_validation()
+    get_res()
+    print get_res()
 
 
 def create_parser():
@@ -26,15 +28,24 @@ if __name__ == '__main__':
 def input_validation():
     enter_dep = re.findall(r'[A-Z]{1,3}', namespace.departure)
     enter_des = re.findall(r'[A-Z]{1,3}', namespace.destination)
+    enter_out = re.findall(r'[0-3]?[0-9].[0-3]?[0-9].[0-3]?[0-9].(?:[0-9]{2})?[0-9]{2}$', namespace.outboundDate)
+    enter_return = re.findall(r'[0-3]?[0-9].[0-3]?[0-9].[0-3]?[0-9].(?:[0-9]{2})?[0-9]{2}$', namespace.returnDate)
 
-    if sys.argv[1] == enter_dep[0] and sys.argv[2] == enter_des[0]:
-        print ("The data is entered correctly")
-    else:
-        print ("The data entered is not correct")
+    if sys.argv[1] != enter_dep[0]:
+        print ("The input is not correct. Example, DME")
         sys.exit()
-
-
-input_validation()
+    elif sys.argv[2] != enter_des[0]:
+        print ("The input is not correct. Example, CGN")
+        sys.exit()
+    elif sys.argv[3] != enter_out[0]:
+        print ("The input is not correct. Example, 2017-05-07")
+        sys.exit()
+    elif sys.argv[4] != enter_return[0]:
+        print ("The input is not correct. Example, 2017-05-14")
+        sys.exit()
+    else:
+        print (enter_dep, enter_des, enter_out, enter_return)
+        print ("The data is entered correctly")
 
 
 def get_res():
@@ -53,7 +64,8 @@ def get_res():
     ses = requests.Session()
     ses_req = ses.post(url, data=data_req, verify=False)
     ses_res = ses.post(ses_req.url, data=data_res, verify=False)
-    return ses_res
+    res = (ses_res.json().get('templates').get('main'))
+    return res
 
 
-print get_res().text
+scrape()  
