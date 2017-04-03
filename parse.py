@@ -1,5 +1,12 @@
 import requests
 import argparse
+import sys
+import re
+
+
+#def scrape():
+    #create_parser()
+    #request = get_res()
 
 
 def create_parser():
@@ -14,6 +21,20 @@ def create_parser():
 if __name__ == '__main__':
     parser = create_parser()
     namespace = parser.parse_args()
+
+
+def input_validation():
+    enter_dep = re.findall(r'[A-Z]{1,3}', namespace.departure)
+    enter_des = re.findall(r'[A-Z]{1,3}', namespace.destination)
+
+    if sys.argv[1] == enter_dep[0] and sys.argv[2] == enter_des[0]:
+        print ("The data is entered correctly")
+    else:
+        print ("The data entered is not correct")
+        sys.exit()
+
+
+input_validation()
 
 
 def get_res():
