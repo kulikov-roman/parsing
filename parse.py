@@ -1,14 +1,16 @@
-import requests
 import argparse
-import sys
 import re
+import sys
+from lxml import etree
+import requests
+from io import StringIO
 
 
 def scrape():
     create_parser()
     input_validation()
     get_res()
-    print get_res()
+    parse_res()
 
 
 def create_parser():
@@ -68,4 +70,11 @@ def get_res():
     return res
 
 
-scrape()  
+def parse_res():
+    pars = etree.HTMLParser()
+    tree = etree.parse(StringIO(get_res()), pars)
+    result = etree.tostring(tree.getroot(), pretty_print=True, method="html")
+    print result
+
+scrape()
+
