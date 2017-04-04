@@ -33,16 +33,16 @@ def input_validation():
     enter_out = re.findall(r'[0-3]?[0-9].[0-3]?[0-9].[0-3]?[0-9].(?:[0-9]{2})?[0-9]{2}$', namespace.outboundDate)
     enter_return = re.findall(r'[0-3]?[0-9].[0-3]?[0-9].[0-3]?[0-9].(?:[0-9]{2})?[0-9]{2}$', namespace.returnDate)
 
-    if sys.argv[1] != enter_dep[0]:
+     if namespace.departure != enter_dep[0]:
         print ("The input is not correct. Example, DME")
         sys.exit()
-    elif sys.argv[2] != enter_des[0]:
+    elif namespace.destination != enter_des[0]:
         print ("The input is not correct. Example, CGN")
         sys.exit()
-    elif sys.argv[3] != enter_out[0]:
+    elif namespace.outboundDate != enter_out[0]:
         print ("The input is not correct. Example, 2017-05-07")
         sys.exit()
-    elif sys.argv[4] != enter_return[0]:
+    elif namespace.returnDate != enter_return[0]:
         print ("The input is not correct. Example, 2017-05-14")
         sys.exit()
     else:
