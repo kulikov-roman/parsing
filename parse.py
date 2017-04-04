@@ -1,9 +1,8 @@
 import argparse
 import re
 import sys
-from lxml import etree
 import requests
-from io import StringIO
+import lxml.html
 
 
 def scrape():
@@ -18,7 +17,7 @@ def create_parser():
     parse.add_argument('departure', nargs='?')
     parse.add_argument('destination', nargs='?')
     parse.add_argument('outboundDate', nargs='?')
-    parse.add_argument('returnDate', nargs='?', default=sys.argv[3])
+    parse.add_argument('returnDate', nargs='?', default='')
     return parse
 
 
@@ -28,12 +27,12 @@ if __name__ == '__main__':
 
 
 def input_validation():
-    enter_dep = re.findall(r'[A-Z]{1,3}', namespace.departure)
-    enter_des = re.findall(r'[A-Z]{1,3}', namespace.destination)
-    enter_out = re.findall(r'[0-3]?[0-9].[0-3]?[0-9].[0-3]?[0-9].(?:[0-9]{2})?[0-9]{2}$', namespace.outboundDate)
-    enter_return = re.findall(r'[0-3]?[0-9].[0-3]?[0-9].[0-3]?[0-9].(?:[0-9]{2})?[0-9]{2}$', namespace.returnDate)
+    enter_dep = re.findall(r"[A-Z]{1,3}", namespace.departure)
+    enter_des = re.findall(r"[A-Z]{1,3}", namespace.destination)
+    enter_out = re.findall(r"[0-3]?[0-9].[0-3]?[0-9].[0-3]?[0-9].(?:[0-9]{2})?[0-9]{2}$", namespace.outboundDate)
+    enter_return = re.findall(r"[0-3]?[0-9].[0-3]?[0-9].[0-3]?[0-9].(?:[0-9]{2})?[0-9]{2}$", namespace.returnDate)
 
-     if namespace.departure != enter_dep[0]:
+    if namespace.departure != enter_dep[0]:
         print ("The input is not correct. Example, DME")
         sys.exit()
     elif namespace.destination != enter_des[0]:
@@ -41,9 +40,6 @@ def input_validation():
         sys.exit()
     elif namespace.outboundDate != enter_out[0]:
         print ("The input is not correct. Example, 2017-05-07")
-        sys.exit()
-    elif namespace.returnDate != enter_return[0]:
-        print ("The input is not correct. Example, 2017-05-14")
         sys.exit()
     else:
         print (enter_dep, enter_des, enter_out, enter_return)
@@ -58,11 +54,18 @@ def get_res():
                 '_ajax[requestParams][outboundDate]': namespace.outboundDate,
                 '_ajax[requestParams][returnDate]': namespace.returnDate,
                 '_ajax[requestParams][oneway]': ''}
+    if namespace.returnDate == '':
+        data_res['_ajax[requestParams][returnDate]'] = namespace.outboundDate
+        data_res['_ajax[requestParams][oneway]'] = 'on'
+
     data_req = {'departure': namespace.departure,
                 'outboundDate': namespace.outboundDate,
                 'returnDate': namespace.returnDate,
                 'oneway': '',
                 'adultCount': '1'}
+    if namespace.returnDate == '':
+        data_req['returnDate'] = namespace.outboundDate
+        data_req['oneway'] = 'on'
     ses = requests.Session()
     ses_req = ses.post(url, data=data_req, verify=False)
     ses_res = ses.post(ses_req.url, data=data_res, verify=False)
@@ -71,10 +74,9 @@ def get_res():
 
 
 def parse_res():
-    pars = etree.HTMLParser()
-    tree = etree.parse(StringIO(get_res()), pars)
-    result = etree.tostring(tree.getroot(), pretty_print=True, method="html")
-    print result
+    html = lxml.html.fromstring(get_res())
+    out_bound = html.xpath('//div[@class="current"]/span/text()')
+    print out_bound
+
 
 scrape()
-
