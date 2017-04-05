@@ -1,6 +1,7 @@
 import argparse
 import re
 import sys
+import lxml
 import requests
 import lxml.html
 
@@ -54,10 +55,6 @@ def get_res():
                 '_ajax[requestParams][outboundDate]': namespace.outboundDate,
                 '_ajax[requestParams][returnDate]': namespace.returnDate,
                 '_ajax[requestParams][oneway]': ''}
-    if namespace.returnDate == '':
-        data_res['_ajax[requestParams][returnDate]'] = namespace.outboundDate
-        data_res['_ajax[requestParams][oneway]'] = 'on'
-
     data_req = {'departure': namespace.departure,
                 'outboundDate': namespace.outboundDate,
                 'returnDate': namespace.returnDate,
@@ -66,6 +63,8 @@ def get_res():
     if namespace.returnDate == '':
         data_req['returnDate'] = namespace.outboundDate
         data_req['oneway'] = 'on'
+        data_res['_ajax[requestParams][returnDate]'] = namespace.outboundDate
+        data_res['_ajax[requestParams][oneway]'] = 'on'
     ses = requests.Session()
     ses_req = ses.post(url, data=data_req, verify=False)
     ses_res = ses.post(ses_req.url, data=data_res, verify=False)
@@ -75,8 +74,9 @@ def get_res():
 
 def parse_res():
     html = lxml.html.fromstring(get_res())
-    out_bound = html.xpath('//div[@class="current"]/span/text()')
-    print out_bound
+    out_bound = html.xpath('//div[@class="lowest"]/span[@title]')
+    for i in out_bound:
+        print (i)
 
 
 scrape()
