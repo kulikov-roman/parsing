@@ -75,6 +75,7 @@ def get_res():
 def parse_res():
     html = lxml.html.fromstring(get_res())
     out_bound = html.xpath('//div[@class="lowest"]/span/@title')
+    price = html.xpath('//td[@class="price"]/text()')
     list_fly = {"start-end: ": [], "duration of journey: ": [], "class type & price: ": []}
     print " start-end:", "      duration of journey:", "      class type & price:"
     for u in out_bound:
@@ -82,7 +83,8 @@ def parse_res():
         list_fly["start-end: "] = u[1]
         list_fly["duration of journey: "] = u[2]
         list_fly["class type & price: "] = u[3]
-        print list_fly["start-end: "],"   ", list_fly["duration of journey: "], "            ", list_fly["class type & price: "], u'&pound'
+        print list_fly["start-end: "], "   ", list_fly["duration of journey: "], "            ", list_fly[
+            "class type & price: "], price
 
 
 scrape()
