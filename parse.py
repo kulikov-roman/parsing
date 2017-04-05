@@ -74,9 +74,11 @@ def get_res():
 
 def parse_res():
     html = lxml.html.fromstring(get_res())
-    out_bound = html.xpath('//div[@class="lowest"]/span[@title]')
-    for i in out_bound:
-        print (i)
+    out_bound = html.xpath('//div[@class="lowest"]/span/@title')
+    list_fly = {"outbound flight: " :  '', "start-end: " :'',"duration of journey: ":'',"class type & price: ":''}
+    for u in out_bound:
+        u = u.split(",")
+        print (u)
 
 
-scrape()
+scrape() 
