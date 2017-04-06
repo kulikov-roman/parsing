@@ -1,5 +1,4 @@
 import argparse
-import re
 import sys
 import lxml
 import requests
@@ -9,9 +8,9 @@ import lxml.html
 def scrape():
     parser = create_parser()
     namespace = parser.parse_args()
-    input_validation(namespace)
-    get_r = get_res(namespace)
-    parse_res(get_r)
+    validation(namespace)
+    responce = get_res(namespace)
+    parse_responce(responce)
 
 
 def create_parser():
@@ -23,35 +22,27 @@ def create_parser():
     return parse
 
 
-def input_validation(namespace):
-    enter_dep = re.findall(r"[A-Z]{1,3}", namespace.departure)
-    enter_des = re.findall(r"[A-Z]{1,3}", namespace.destination)
-    enter_out = re.findall(r"[0-3]?[0-9].[0-3]?[0-9].[0-3]?[0-9].(?:[0-9]{2})?[0-9]{2}$", namespace.outboundDate)
-    enter_return = re.findall(r"[0-3]?[0-9].[0-3]?[0-9].[0-3]?[0-9].(?:[0-9]{2})?[0-9]{2}$", namespace.returnDate)
-
-    if namespace.departure != enter_dep[0]:
+def validation(namespace):
+    if not namespace.departure.isalpha() or len(namespace.departure) != 3:
         print ("The input is not correct. Example, DME")
         sys.exit()
-    elif namespace.destination != enter_des[0]:
+    elif not namespace.destination.isalpha() or len(namespace.destination) != 3:
         print ("The input is not correct. Example, CGN")
         sys.exit()
-    elif namespace.outboundDate != enter_out[0]:
-        print ("The input is not correct. Example, 2017-05-07")
-        sys.exit()
     else:
-        print (enter_dep, enter_des, enter_out, enter_return)
+        print (namespace.departure, namespace.destination, namespace.outboundDate, namespace.returnDate)
         print ("The data is entered correctly")
 
 
 def get_res(namespace):
-    url = 'https://www.flyniki.com/en/booking/flight/vacancy.php?'
+    url = 'https://www.flyniki.com/en/booking/flight/vacancy.php'
     data_res = {'_ajax[templates][]': ('main', 'priceoverview', 'infos', 'flightinfo'),
-                '_ajax[requestParams][departure]': namespace.departure,
-                '_ajax[requestParams][destination]': namespace.destination,
+                '_ajax[requestParams][departure]': namespace.departure.upper(),
+                '_ajax[requestParams][destination]': namespace.destination.upper(),
                 '_ajax[requestParams][outboundDate]': namespace.outboundDate,
                 '_ajax[requestParams][returnDate]': namespace.returnDate,
                 '_ajax[requestParams][oneway]': ''}
-    data_req = {'departure': namespace.departure,
+    data_req = {'departure': namespace.departure.upper(),
                 'outboundDate': namespace.outboundDate,
                 'returnDate': namespace.returnDate,
                 'oneway': '',
@@ -68,25 +59,26 @@ def get_res(namespace):
     return res
 
 
-def parse_res(get_r):
-    html = lxml.html.fromstring(get_r)
+def parse_responce(responce):
+    html = lxml.html.fromstring(responce)
     out_bound = html.xpath('//div[@class="lowest"]/span/@title')
-    price = html.xpath('//th[@class="faregrouptoggle ECO style-eco-comf"]/text()')
-    list_fly = {"departure: ": [], "arrival: ": [], "duration of journey: ": [], "price:": [], "class type: ": []}
-    print " departure:", "   ", "arrival:", "      duration of journey:", "      price:", "         class type:"
+    currency = html.xpath('//th[@class="faregrouptoggle ECO style-eco-comf"]/text()')
+    list_fly = {"departure": [],
+                "arrival": [],
+                "duration of journey": [],
+                "price": [],
+                "class type": [],
+                "currency": currency}
     for u in out_bound:
         u = u.split(",")
         dep_arriv = u[1].split("-")
         class_flight = u[3].split(":")
-        list_fly["departure: "] = dep_arriv[0]
-        list_fly["arrival: "] = dep_arriv[1]
-        list_fly["duration of journey: "] = u[2]
-        list_fly["class type: "] = class_flight[0]
-        list_fly["price : "] = class_flight[1].strip()
-        print " ", list_fly["departure: "], "       ", list_fly["arrival: "], "          ", list_fly[
-            "duration of journey: "], "         ", price[0].strip(), list_fly[
-            "price : "], "     ", list_fly["class type: "]
-
+        list_fly["departure"].append(dep_arriv[0])
+        list_fly["arrival"].append(dep_arriv[1])
+        list_fly["duration of journey"].append(u[2])
+        list_fly["class type"].append(class_flight[0])
+        list_fly["price"].append(class_flight[1].strip())
 
 if __name__ == '__main__':
     scrape()
+
