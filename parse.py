@@ -75,20 +75,20 @@ def get_res():
 def parse_res():
     html = lxml.html.fromstring(get_res())
     out_bound = html.xpath('//div[@class="lowest"]/span/@title')
-    price = html.xpath('//tr[@class="additionals-fuel"]/td[@class="price"]/text()')
-    print price
-    list_fly = {"start-end: ": [], "duration of journey: ": [], "price: ": [], "class type: ": []}
-    print " start-end:", "      duration of journey:", "      price:", "         class type:"
+    price = html.xpath('//th[@class="faregrouptoggle ECO style-eco-comf"]/text()')
+    list_fly = {"departure: ": [], "arrival: ": [], "duration of journey: ": [], "price:": [], "class type: ": []}
+    print " departure:","   ","arrival:", "      duration of journey:", "      price:","   currency:", "         class type:"
     for u in out_bound:
         u = u.split(",")
-        list_fly["start-end: "] = u[1]
-        list_fly["duration of journey: "] = u[2]
+        dep_arriv = u[1].split("-")
         class_flight = u[3].split(":")
+        list_fly["departure: "] = dep_arriv[0]
+        list_fly["arrival: "] = dep_arriv[1]
+        list_fly["duration of journey: "] = u[2]
         list_fly["class type: "] = class_flight[0]
         list_fly["price : "] = class_flight[1]
-
-        print list_fly["start-end: "], "   ", list_fly["duration of journey: "], "            ", list_fly[
-            "price : "], "       ", list_fly["class type: "]
+        print " ",list_fly["departure: "],"       ",list_fly["arrival: "] , "          ", list_fly["duration of journey: "], "        ", list_fly[
+            "price : "],"    ",price[0], "           ", list_fly["class type: "]
 
 
 scrape()
