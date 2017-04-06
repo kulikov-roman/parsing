@@ -73,7 +73,7 @@ def parse_res(get_r):
     out_bound = html.xpath('//div[@class="lowest"]/span/@title')
     price = html.xpath('//th[@class="faregrouptoggle ECO style-eco-comf"]/text()')
     list_fly = {"departure: ": [], "arrival: ": [], "duration of journey: ": [], "price:": [], "class type: ": []}
-    print " departure:", "   ", "arrival:", "      duration of journey:", "      price:", "   currency:", "         class type:"
+    print " departure:", "   ", "arrival:", "      duration of journey:", "      price:", "         class type:"
     for u in out_bound:
         u = u.split(",")
         dep_arriv = u[1].split("-")
@@ -82,10 +82,10 @@ def parse_res(get_r):
         list_fly["arrival: "] = dep_arriv[1]
         list_fly["duration of journey: "] = u[2]
         list_fly["class type: "] = class_flight[0]
-        list_fly["price : "] = class_flight[1]
+        list_fly["price : "] = class_flight[1].strip()
         print " ", list_fly["departure: "], "       ", list_fly["arrival: "], "          ", list_fly[
-            "duration of journey: "], "        ", list_fly[
-            "price : "], "    ", price[0], "           ", list_fly["class type: "]
+            "duration of journey: "], "         ", price[0].strip(), list_fly[
+            "price : "], "     ", list_fly["class type: "]
 
 
 if __name__ == '__main__':
