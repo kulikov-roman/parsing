@@ -7,10 +7,11 @@ import lxml.html
 
 
 def scrape():
-    create_parser()
-    input_validation()
-    get_res()
-    parse_res()
+    parser = create_parser()
+    namespace = parser.parse_args()
+    input_validation(namespace)
+    get_r = get_res(namespace)
+    parse_res(get_r)
 
 
 def create_parser():
@@ -22,12 +23,7 @@ def create_parser():
     return parse
 
 
-if __name__ == '__main__':
-    parser = create_parser()
-    namespace = parser.parse_args()
-
-
-def input_validation():
+def input_validation(namespace):
     enter_dep = re.findall(r"[A-Z]{1,3}", namespace.departure)
     enter_des = re.findall(r"[A-Z]{1,3}", namespace.destination)
     enter_out = re.findall(r"[0-3]?[0-9].[0-3]?[0-9].[0-3]?[0-9].(?:[0-9]{2})?[0-9]{2}$", namespace.outboundDate)
@@ -47,7 +43,7 @@ def input_validation():
         print ("The data is entered correctly")
 
 
-def get_res():
+def get_res(namespace):
     url = 'https://www.flyniki.com/en/booking/flight/vacancy.php?'
     data_res = {'_ajax[templates][]': ('main', 'priceoverview', 'infos', 'flightinfo'),
                 '_ajax[requestParams][departure]': namespace.departure,
@@ -72,12 +68,12 @@ def get_res():
     return res
 
 
-def parse_res():
-    html = lxml.html.fromstring(get_res())
+def parse_res(get_r):
+    html = lxml.html.fromstring(get_r)
     out_bound = html.xpath('//div[@class="lowest"]/span/@title')
     price = html.xpath('//th[@class="faregrouptoggle ECO style-eco-comf"]/text()')
     list_fly = {"departure: ": [], "arrival: ": [], "duration of journey: ": [], "price:": [], "class type: ": []}
-    print " departure:","   ","arrival:", "      duration of journey:", "      price:","   currency:", "         class type:"
+    print " departure:", "   ", "arrival:", "      duration of journey:", "      price:", "   currency:", "         class type:"
     for u in out_bound:
         u = u.split(",")
         dep_arriv = u[1].split("-")
@@ -87,8 +83,10 @@ def parse_res():
         list_fly["duration of journey: "] = u[2]
         list_fly["class type: "] = class_flight[0]
         list_fly["price : "] = class_flight[1]
-        print " ",list_fly["departure: "],"       ",list_fly["arrival: "] , "          ", list_fly["duration of journey: "], "        ", list_fly[
-            "price : "],"    ",price[0], "           ", list_fly["class type: "]
+        print " ", list_fly["departure: "], "       ", list_fly["arrival: "], "          ", list_fly[
+            "duration of journey: "], "        ", list_fly[
+            "price : "], "    ", price[0], "           ", list_fly["class type: "]
 
 
-scrape()
+if __name__ == '__main__':
+    scrape()
