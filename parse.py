@@ -16,9 +16,9 @@ def scrape():
 
 def create_parser():
     parse = argparse.ArgumentParser()
-    parse.add_argument('departure', nargs='?')
-    parse.add_argument('destination', nargs='?')
-    parse.add_argument('outboundDate', nargs='?')
+    parse.add_argument('departure')
+    parse.add_argument('destination')
+    parse.add_argument('outboundDate')
     parse.add_argument('returnDate', nargs='?', default='')
     return parse
 
