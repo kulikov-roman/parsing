@@ -10,14 +10,14 @@ def scrape():
     namespace = parser.parse_args()
     validation(namespace)
     responce = get_res(namespace)
-    #parse_responce(responce)
+    parse_responce(responce)
 
 
 def create_parser():
     parse = argparse.ArgumentParser()
     parse.add_argument('departure')
     parse.add_argument('destination')
-    parse.add_argument('outboundDate', type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d'))
+    parse.add_argument('outboundDate') #, type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d'))
     parse.add_argument('returnDate', nargs='?', default='')
     return parse
 
@@ -39,11 +39,11 @@ def get_res(namespace):
     data_res = {'_ajax[templates][]': ('main', 'priceoverview', 'infos', 'flightinfo'),
                 '_ajax[requestParams][departure]': namespace.departure.upper(),
                 '_ajax[requestParams][destination]': namespace.destination.upper(),
-                '_ajax[requestParams][outboundDate]': namespace.outboundDate.strftime('%Y-%m-%d'),
+                '_ajax[requestParams][outboundDate]': namespace.outboundDate, #.strftime('%Y-%m-%d'),
                 '_ajax[requestParams][returnDate]': namespace.returnDate,
                 '_ajax[requestParams][oneway]': ''}
     data_req = {'departure': namespace.departure.upper(),
-                'outboundDate': namespace.outboundDate,
+                'outboundDate': namespace.outboundDate, #.strftime('%Y-%m-%d'),
                 'returnDate': namespace.returnDate,
                 'oneway': '',
                 'adultCount': '1'}
@@ -60,9 +60,11 @@ def get_res(namespace):
     return res
 
 
-"""def parse_responce(responce):
+def parse_responce(responce):
     html = lxml.html.fromstring(responce)
-    out_bound = html.xpath('//div[@class="lowest"]/span/@title')
+    out_bound = html.xpath('//tbody[@role="radiogroup"]/tr[contains(@class, "flightrow")]/td[@class="table-text-left"]/span/time/text()')
+    print out_bound
+    """
     currency = html.xpath('//th[@class="faregrouptoggle ECO style-eco-comf"]/text()')
     quotes_list = []
     # list_fly = {"departure": [],
