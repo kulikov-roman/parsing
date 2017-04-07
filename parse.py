@@ -62,8 +62,10 @@ def get_res(namespace):
 
 def parse_responce(responce):
     html = lxml.html.fromstring(responce)
-    out_bound = html.xpath('//tbody[@role="radiogroup"]/tr[contains(@class, "flightrow")]/td[@class="table-text-left"]/span/time/text()')
-    print out_bound
+    outbound_flights = html.xpath('//tbody[@role="radiogroup"]/tr[contains(@class, "flightrow")]/td[@class="table-text-left"]/span/time/text()')
+    for flight in outbound_flights:
+        price = flight.xpath('./td[contains(@class )]')
+
     """
     currency = html.xpath('//th[@class="faregrouptoggle ECO style-eco-comf"]/text()')
     quotes_list = []
