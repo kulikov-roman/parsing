@@ -64,6 +64,7 @@ def get_res(namespace):
 def parse_responce(responce):
     html = lxml.html.fromstring(responce)
     outbound_flights = html.xpath('//tbody[@role="radiogroup"]/tr[contains(@class, "flightrow")]')
+    quotes_list = []
     for flight in outbound_flights:
         start_end = flight.xpath('./td/span/time/text()')
         duration = flight.xpath('./td[@class="table-text-left"]/span/text()')
@@ -76,18 +77,22 @@ def parse_responce(responce):
         print start_end
         print sdfsdf[6]
         print number_flight[0], number_flight[3]
-        quotes_list = {"start/end": [],
-                       "duration of journey": [],
-                       "currency": currency,
-                       "price":{"price_eco": [],
-                                "price_flex": [],
-                                "price_business": []},
-                      }
-        quotes_list["price"]["price_eco"].append(float(prices[0]))
-        quotes_list["price"]["price_flex"].append(float(prices[1]))
+        quote = {"departure": start_end[0],
+                 "arrival": start_end[1],
+                 "duration of journey": duration[3],
+                 "currency": currency,
+                 "price": {"price_eco": [],
+                           "price_flex": [],
+                           "price_business": []},
+                 }
+        quote["price"]["price_eco"].append(float(prices[0]))
+        quote["price"]["price_flex"].append(float(prices[1]))
         if len(prices) == 3:
-            quotes_list["price"]["price_business"].append(float(prices[2]))
-        print quotes_list["price"]
+            quote["price"]["price_business"].append(float(prices[2]))
+        print quote
+        quotes_list.append(quote)
+    print quotes_list
+
+
 if __name__ == '__main__':
     scrape()
-
