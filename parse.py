@@ -67,53 +67,27 @@ def parse_responce(responce):
     for flight in outbound_flights:
         start_end = flight.xpath('./td/span/time/text()')
         duration = flight.xpath('./td[@class="table-text-left"]/span/text()')
-        price = flight.xpath('./td[@role="radio"]/label/div[@class="lowest"]/span/text()')
+        prices = flight.xpath('./td[@role="radio"]/label/div[@class="lowest"]/span/text()')
         sdfsdf = flight.xpath('//tbody/tr/td/span/text()')
         number_flight = flight.xpath('//table[@role="presentation"]/tbody/tr/td[@class="table-text-center"]/text()')
-        print price
+        currency = html.xpath('//th[@class="faregrouptoggle ECO style-eco-comf"]/text()')
+        print prices
         print duration[3]
         print start_end
-        print sdfsdf[24]
+        print sdfsdf[6]
         print number_flight[0], number_flight[3]
-    """
-    currency = html.xpath('//th[@class="faregrouptoggle ECO style-eco-comf"]/text()')
-    quotes_list = []
-    # list_fly = {"departure": [],
-    #             "arrival": [],
-    #             "duration of journey": [],
-    #             "price_list": [],
-    #             "price_float": [],
-    #             "class type": [],
-    #             "currency": currency}
-    for u in out_bound:
-        segment_info = u.xpath
-        u = u.split(",")
-        dep_arriv = u[1].split("-")
-        class_flight = u[3].split(":")
-        dep_time = dep_arriv[0]
-        arr_time = dep_arriv[1]
-        price = float((class_flight[1].strip())
-        flight = {
-            "out_bound": {
-                out_
-            }
-                     "departure": dep_time,
-                "arrival": arr_time,
-                "duration of journey": ,
-                "price": ,
-                "class type": ,
-                "currency": currency}
-        list_fly["departure"].append(dep_arriv[0])
-        list_fly["arrival"].append(dep_arriv[1])
-        list_fly["duration of journey"].append(u[2])
-        list_fly["class type"].append(class_flight[0])
-        list_fly["price_list"].append(class_flight[1].strip())
-        quotes_list.append(flight)
-    print list_fly["price_list"]
-    for i in list_fly["price_list"]:
-        list_fly["price_float"].append(float(i))
-    print list_fly["price_float"]
-    print list_fly
-"""
+        quotes_list = {"start/end": [],
+                       "duration of journey": [],
+                       "currency": currency,
+                       "price":{"price_eco": [],
+                                "price_flex": [],
+                                "price_business": []},
+                      }
+        quotes_list["price"]["price_eco"].append(float(prices[0]))
+        quotes_list["price"]["price_flex"].append(float(prices[1]))
+        if len(prices) == 3:
+            quotes_list["price"]["price_business"].append(float(prices[2]))
+        print quotes_list["price"]
 if __name__ == '__main__':
     scrape()
+
