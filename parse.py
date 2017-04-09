@@ -24,15 +24,19 @@ def create_parser():
 
 
 def validation(namespace):
+
     if not namespace.departure.isalpha() or len(namespace.departure) != 3:
         print ("The input is not correct. Example, DME")
         sys.exit()
     elif not namespace.destination.isalpha() or len(namespace.destination) != 3:
         print ("The input is not correct. Example, CGN")
         sys.exit()
+    elif namespace.outboundDate < datetime.datetime.now():
+        print datetime.datetime.today()
+        print ("The input is not correct.")
+        sys.exit()
     else:
-        print (namespace.departure, namespace.destination, namespace.outboundDate, namespace.returnDate)
-        print ("The data is entered correctly")
+        print ("The input is correct.")
 
 
 def get_res(namespace):
@@ -69,14 +73,10 @@ def parse_responce(responce):
         start_end = flight.xpath('./td/span/time/text()')
         duration = flight.xpath('./td[@class="table-text-left"]/span/text()')
         prices = flight.xpath('./td[@role="radio"]/label/div[@class="lowest"]/span/text()')
-        sdfsdf = flight.xpath('//tbody/tr/td/span/text()')
-        number_flight = flight.xpath('//table[@role="presentation"]/tbody/tr/td[@class="table-text-center"]/text()')
+        # prices1 = flight.xpath('//tbody/tr/td/span[@class="notbookable"]/text()')
+        # sdfsdf = flight.xpath('//tbody/tr/td/span/text()')
+        # number_flight = flight.xpath('//table[@role="presentation"]/tbody/tr/td[@class="table-text-center"]/text()')
         currency = html.xpath('//th[@class="faregrouptoggle ECO style-eco-comf"]/text()')
-        print prices
-        print duration[3]
-        print start_end
-        print sdfsdf[6]
-        print number_flight[0], number_flight[3]
         quote = {"departure": start_end[0],
                  "arrival": start_end[1],
                  "duration of journey": duration[3],
@@ -89,9 +89,9 @@ def parse_responce(responce):
         quote["price"]["price_flex"].append(float(prices[1]))
         if len(prices) == 3:
             quote["price"]["price_business"].append(float(prices[2]))
-        print quote
         quotes_list.append(quote)
-    print quotes_list
+    for i in quotes_list:
+        print (i)
 
 
 if __name__ == '__main__':
