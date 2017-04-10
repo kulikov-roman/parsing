@@ -4,6 +4,8 @@ import lxml
 import requests
 import lxml.html
 import datetime
+import re
+# 13.04.2017
 
 
 def scrape():
@@ -71,14 +73,28 @@ def get_res(namespace):
 def parse_responce(responce):
     html = lxml.html.fromstring(responce)
     outbound_flights = html.xpath('//tbody[@role="radiogroup"]/tr[contains(@class, "flightrow")]')
-    currency = html.xpath('//th[@class="faregrouptoggle ECO style-eco-comf"]/text()')
-    quotes_list = []
+    # currency = html.xpath('//th[@class="faregrouptoggle ECO style-eco-comf"]/text()')
+    # quotes_list = []
     for n, flight in enumerate(outbound_flights):
-        details_flight = flight.xpath('./../tr[@id="flightDetailsFi_{}"]/td/table'.format(n))[0]
-        departure = details_flight.xpath('./tbody/tr/td/span/time/text()')
+        details_flight = flight.xpath('./../tr[@id="flightDetailsFi_{}"]/td/table/tbody'.format(n))[0]
+        for details in details_flight:
+            time_departure = details.xpath('./td/span/time/text()')
+            flight_number = details.xpath('./td[@class="table-text-center"]/text()')
+            city_departure = details.xpath('./td/span/text()')
+            for city in city_departure:
+                code = re.findall(r'[A-Z]{3}', city)
+                print city
+            # enter_dep = re.findall(r'[A-Z]{1,3}', city_departure)
+            # print time_departure
+            # print flight_number[0]
+            # print city_departure
+
+
+        """departure = details_flight.xpath('./tbody/tr/td/span/time/text()')
         fly = details_flight.xpath('./tbody/tr/td/span/text()')
         number_flight = details_flight.xpath('./tbody/tr/td[@class="table-text-center"]/text()')
         print departure, fly,number_flight
+        """
     # for flight in outbound_flights:
         # start_end = flight.xpath('./td/span/time/text()')
         # duration = flight.xpath('./td[@class="table-text-left"]/span/text()')
