@@ -78,7 +78,7 @@ def parse_responce(responce):
         departure = details_flight.xpath('./tbody/tr/td/span/time/text()')
         fly = details_flight.xpath('./tbody/tr/td/span/text()')
         number_flight = details_flight.xpath('./tbody/tr/td[@class="table-text-center"]/text()')
-        print departure, fly[1],fly[3],fly[5],fly[7], number_flight[0], number_flight[3]
+        print departure, fly,number_flight
     # for flight in outbound_flights:
         # start_end = flight.xpath('./td/span/time/text()')
         # duration = flight.xpath('./td[@class="table-text-left"]/span/text()')
