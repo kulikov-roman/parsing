@@ -24,15 +24,18 @@ def create_parser():
 
 
 def validation(namespace):
-
+    date = datetime.datetime.now()
+    current_date = date.strftime('%Y-%m-%d')
+    # comment magic number
+    limit_date = date + datetime.timedelta(days=360)
+    limit_date = limit_date.strftime('%Y-%m-%d')
     if not namespace.departure.isalpha() or len(namespace.departure) != 3:
         print ("The input is not correct. Example, DME")
         sys.exit()
     elif not namespace.destination.isalpha() or len(namespace.destination) != 3:
         print ("The input is not correct. Example, CGN")
         sys.exit()
-    elif namespace.outboundDate < datetime.datetime.now():
-        print datetime.datetime.today()
+    elif namespace.outboundDate.strftime('%Y-%m-%d') < current_date or namespace.outboundDate.strftime('%Y-%m-%d') > limit_date:
         print ("The input is not correct.")
         sys.exit()
     else:
@@ -68,20 +71,28 @@ def get_res(namespace):
 def parse_responce(responce):
     html = lxml.html.fromstring(responce)
     outbound_flights = html.xpath('//tbody[@role="radiogroup"]/tr[contains(@class, "flightrow")]')
+    currency = html.xpath('//th[@class="faregrouptoggle ECO style-eco-comf"]/text()')
     quotes_list = []
-    for flight in outbound_flights:
-        start_end = flight.xpath('./td/span/time/text()')
-        duration = flight.xpath('./td[@class="table-text-left"]/span/text()')
-        prices = flight.xpath('./td[@role="radio"]/label/div[@class="lowest"]/span/text()')
+    for n, flight in enumerate(outbound_flights):
+        details_flight = flight.xpath('./../tr[@id="flightDetailsFi_{}"]/td/table'.format(n))[0]
+        departure = details_flight.xpath('./tbody/tr/td/span/time/text()')
+        fly = details_flight.xpath('./tbody/tr/td/span/text()')
+        number_flight = details_flight.xpath('./tbody/tr/td[@class="table-text-center"]/text()')
+        print departure, fly[1],fly[3],fly[5],fly[7], number_flight[0], number_flight[3]
+    # for flight in outbound_flights:
+        # start_end = flight.xpath('./td/span/time/text()')
+        # duration = flight.xpath('./td[@class="table-text-left"]/span/text()')
+        # prices = flight.xpath('./td[@role="radio"]/label/div[@class="lowest"]/span/text()')
         # prices1 = flight.xpath('//tbody/tr/td/span[@class="notbookable"]/text()')
-        # sdfsdf = flight.xpath('//tbody/tr/td/span/text()')
+        # transplant = flight.xpath('//tbody/tr/td/span/text()')
         # number_flight = flight.xpath('//table[@role="presentation"]/tbody/tr/td[@class="table-text-center"]/text()')
-        currency = html.xpath('//th[@class="faregrouptoggle ECO style-eco-comf"]/text()')
+        # flight.xpath('./../tr[@id="flightDetailsFi_{}"]'.format(n))
+    """
         quote = {"departure": start_end[0],
                  "arrival": start_end[1],
                  "duration of journey": duration[3],
                  "currency": currency,
-                 "price": {"price_eco": [],
+                 "price": {" ": [],
                            "price_flex": [],
                            "price_business": []},
                  }
@@ -92,7 +103,7 @@ def parse_responce(responce):
         quotes_list.append(quote)
     for i in quotes_list:
         print (i)
-
+"""
 
 if __name__ == '__main__':
     scrape()
