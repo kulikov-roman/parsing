@@ -1,10 +1,9 @@
-import argparse
+from argparse import ArgumentParser
 import sys
 import lxml.html
 
 from datetime import datetime, timedelta
-
-from requests import Session
+import requests
 
 
 def scrape():
@@ -16,7 +15,7 @@ def scrape():
 
 
 def create_parser():
-    parse = argparse.ArgumentParser()
+    parse = ArgumentParser()
     parse.add_argument('departure')
     parse.add_argument('destination')
     parse.add_argument('outboundDate', type=lambda s: datetime.strptime(s, '%Y-%m-%d'))
@@ -65,7 +64,7 @@ def get_res(namespace):
         data_req['oneway'] = 'on'
         data_res['_ajax[requestParams][returnDate]'] = namespace.outboundDate.strftime('%Y-%m-%d')
         data_res['_ajax[requestParams][oneway]'] = 'on'
-    ses = Session()
+    ses = requests.Session()
     ses_req = ses.post(url, data=data_req, verify=False)
     ses_res = ses.post(ses_req.url, data=data_res, verify=False)
     res = (ses_res.json().get('templates').get('main'))
