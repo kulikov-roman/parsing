@@ -5,6 +5,8 @@ import requests
 import lxml.html
 import datetime
 import re
+
+
 # 13.04.2017
 
 
@@ -37,7 +39,10 @@ def validation(namespace):
     elif not namespace.destination.isalpha() or len(namespace.destination) != 3:
         print ("The input is not correct. Example, CGN")
         sys.exit()
-    elif namespace.outboundDate.strftime('%Y-%m-%d') < current_date or namespace.outboundDate.strftime('%Y-%m-%d') > limit_date:
+    elif namespace.outboundDate.strftime('%Y-%m-%d') < current_date:
+        print ("The input is not correct.")
+        sys.exit()
+    elif namespace.outboundDate.strftime('%Y-%m-%d') > limit_date:
         print ("The input is not correct.")
         sys.exit()
     else:
@@ -73,52 +78,50 @@ def get_res(namespace):
 def parse_responce(responce):
     html = lxml.html.fromstring(responce)
     outbound_flights = html.xpath('//tbody[@role="radiogroup"]/tr[contains(@class, "flightrow")]')
+
     # currency = html.xpath('//th[@class="faregrouptoggle ECO style-eco-comf"]/text()')
     # quotes_list = []
     for n, flight in enumerate(outbound_flights):
+        price_eco = flight.xpath('./td[contains(@headers, "ECO_COMF")]/label/div[@class="lowest"]/span/text()')
+        price_flex = flight.xpath('./td[contains(@headers, "ECO_PREM")]/label/div[@class="lowest"]/span/text()')
+        price_business = flight.xpath('./td[contains(@headers, "BUS_FLEX")]/label/div[@class="lowest"]/span/text()')
+        print price_eco, price_flex, price_business
         details_flight = flight.xpath('./../tr[@id="flightDetailsFi_{}"]/td/table/tbody'.format(n))[0]
         for details in details_flight:
             time_departure = details.xpath('./td/span/time/text()')
-            flight_number = details.xpath('./td[@class="table-text-center"]/text()')
+            flight_numbers = details.xpath('./td[@class="table-text-center"]/text()')
             city_departure = details.xpath('./td/span/text()')
+            code_city = []
+            flight_number = []
             for city in city_departure:
                 code = re.findall(r'[A-Z]{3}', city)
-                print city
-            # enter_dep = re.findall(r'[A-Z]{1,3}', city_departure)
-            # print time_departure
-            # print flight_number[0]
-            # print city_departure
+                if code:
+                    code_city.append(code)
+            for number in flight_numbers:
+                if number != " ":
+                    flight_number.append(number)
+            print time_departure, code_city, flight_number
 
 
-        """departure = details_flight.xpath('./tbody/tr/td/span/time/text()')
-        fly = details_flight.xpath('./tbody/tr/td/span/text()')
-        number_flight = details_flight.xpath('./tbody/tr/td[@class="table-text-center"]/text()')
-        print departure, fly,number_flight
-        """
-    # for flight in outbound_flights:
-        # start_end = flight.xpath('./td/span/time/text()')
-        # duration = flight.xpath('./td[@class="table-text-left"]/span/text()')
-        # prices = flight.xpath('./td[@role="radio"]/label/div[@class="lowest"]/span/text()')
-        # prices1 = flight.xpath('//tbody/tr/td/span[@class="notbookable"]/text()')
-        # transplant = flight.xpath('//tbody/tr/td/span/text()')
-        # number_flight = flight.xpath('//table[@role="presentation"]/tbody/tr/td[@class="table-text-center"]/text()')
-        # flight.xpath('./../tr[@id="flightDetailsFi_{}"]'.format(n))
-    """
+"""
+    for flight in outbound_flights:
+        start_end = flight.xpath('./td/span/time/text()')
+        duration = flight.xpath('./td[@class="table-text-left"]/span/text()')
+        prices = flight.xpath('./td[@role="radio"]/label/div[@class="lowest"]/span/text()')
+        prices1 = flight.xpath('//tbody/tr/td/span[@class="notbookable"]/text()')
+        transplant = flight.xpath('//tbody/tr/td/span/text()')
+        number_flight = flight.xpath('//table[@role="presentation"]/tbody/tr/td[@class="table-text-center"]/text()')
+
         quote = {"departure": start_end[0],
                  "arrival": start_end[1],
+                 "segments:{segment_1:{} ,
+                            segment_2:{}}
                  "duration of journey": duration[3],
                  "currency": currency,
-                 "price": {" ": [],
+                 "price": {"price_eco": [],
                            "price_flex": [],
                            "price_business": []},
                  }
-        quote["price"]["price_eco"].append(float(prices[0]))
-        quote["price"]["price_flex"].append(float(prices[1]))
-        if len(prices) == 3:
-            quote["price"]["price_business"].append(float(prices[2]))
-        quotes_list.append(quote)
-    for i in quotes_list:
-        print (i)
 """
 
 if __name__ == '__main__':
