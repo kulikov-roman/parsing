@@ -80,7 +80,7 @@ def parse_responce(res):
     currency = html_res.xpath('//th[@class="faregrouptoggle ECO style-eco-comf"]/text()')
     quotes_list_outbound = []
     quotes_list_return = []
-
+    quotes_sum = []
     for n, flight_outnbound in enumerate(outbound_flights):
         price_eco = flight_outnbound.xpath(
             "./td[contains(@headers, \"ECO_COMF\")]/label/div[@class=\"lowest\"]/span/text()")
@@ -165,54 +165,23 @@ def parse_responce(res):
             print table.draw()
     else:
         for quote_list in quotes_list_outbound:
-            table = texttable.Texttable()
-            table.set_cols_align(["l", "r", "c"])
-            table.set_cols_valign(["t", "m", "b"])
-            table = texttable.Texttable()
-            table.set_deco(texttable.Texttable.HEADER)
-            table.set_cols_dtype(['t', 't', 't', 'a', 'a', 'a', 'a'])
-            table.set_cols_align(["c", "c", "c", "c", "c", "c", "c"])
-            table.set_cols_width([9, 7, 19, 15, 12, 13, 8])
-            table.add_rows([
-                [quote_list["departure"],
-                 quote_list["arrival"],
-                 quote_list["duration of journey"],
-                 quote_list["price"]["price_eco"],
-                 quote_list["price"]["price_flex"],
-                 quote_list["price"]["price_business"],
-                 quote_list["currency"][0]]])
-            print table.draw()
-        table = texttable.Texttable()
-        table.set_cols_align(["l", "r", "c"])
-        table.set_cols_valign(["t", "m", "b"])
-        table = texttable.Texttable()
-        table.set_deco(texttable.Texttable.HEADER)
-        table.set_cols_dtype(['t', 't', 't', 'a', 'a', 'a', 'a'])
-        table.set_cols_align(["c", "c", "c", "c", "c", "c", "c"])
-        table.set_cols_width([9, 7, 19, 15, 12, 13, 8])
-        table.add_rows([["departure", "arrival", "duration of journey",
-                         "economy classic", "economy flex", "business flex", "currency"],
-                        ])
-        print table.draw()
+            quotes = {'departure_outbound': quote_list['departure'],
+                      'arrival_outbound': quote_list['arrival'],
+                      'currency': quote_list['currency'],
+                      'price_outbound': {'price_eco': quote_list['price']['price_eco'],
+                                         'price_flex': quote_list['price']['price_flex'],
+                                         'business_flex': quote_list['price']['price_business']}}
+            quotes_sum.append(quotes)
+
         for quote_list in quotes_list_return:
-            table = texttable.Texttable()
-            table.set_cols_align(["l", "r", "c"])
-            table.set_cols_valign(["t", "m", "b"])
-            table = texttable.Texttable()
-            table.set_deco(texttable.Texttable.HEADER)
-            table.set_cols_dtype(['t', 't', 't', 'a', 'a', 'a', 'a'])
-            table.set_cols_align(["c", "c", "c", "c", "c", "c", "c"])
-            table.set_cols_width([9, 7, 19, 15, 12, 13, 8])
-            table.add_rows([
-                [quote_list["departure"],
-                 quote_list["arrival"],
-                 quote_list["duration of journey"],
-                 quote_list["price"]["price_eco"],
-                 quote_list["price"]["price_flex"],
-                 quote_list["price"]["price_business"],
-                 quote_list["currency"][0]]])
-            print table.draw()
+            quotes = {'departure_return': quote_list['departure'],
+                      'arrival_return': quote_list['arrival'],
+                      'price_return': {'price_eco': quote_list['price']['price_eco'],
+                                       'price_flex': quote_list['price']['price_flex'],
+                                       'business_flex': quote_list['price']['price_business']}}
+            quotes_sum.append(quotes)
 
 
 if __name__ == '__main__':
     scrape()
+
