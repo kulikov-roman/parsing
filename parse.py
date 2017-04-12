@@ -1,5 +1,7 @@
 from argparse import ArgumentParser
 import sys
+
+import texttable
 import lxml.html
 
 from datetime import datetime, timedelta
@@ -26,8 +28,8 @@ def create_parser():
 def validation(namespace):
     date = datetime.now()
     current_date = date.strftime('%Y-%m-%d')
-    # the maximum date that can be selected is limited to 360 days from the current date
-    limit_date = date + timedelta(days=360)
+    # the maximum date that can be selected is limited to 365 days from the current date
+    limit_date = date + timedelta(days=365)
     limit_date = limit_date.strftime('%Y-%m-%d')
     if not namespace.departure.isalpha() or len(namespace.departure) != 3:
         print ("The input is not correct. Example, DME")
@@ -78,6 +80,7 @@ def parse_responce(res):
     currency = html_res.xpath('//th[@class="faregrouptoggle ECO style-eco-comf"]/text()')
     quotes_list_outbound = []
     quotes_list_return = []
+
     for n, flight_outnbound in enumerate(outbound_flights):
         price_eco = flight_outnbound.xpath(
             "./td[contains(@headers, \"ECO_COMF\")]/label/div[@class=\"lowest\"]/span/text()")
@@ -128,62 +131,87 @@ def parse_responce(res):
                  }
         quotes_list_return.append(quote)
 
+    table = texttable.Texttable()
+    table.set_cols_align(["l", "r", "c"])
+    table.set_cols_valign(["t", "m", "b"])
+    table = texttable.Texttable()
+    table.set_deco(texttable.Texttable.HEADER)
+    table.set_cols_dtype(['t', 't', 't', 'a', 'a', 'a', 'a'])
+    table.set_cols_align(["c", "c", "c", "c", "c", "c", "c"])
+    table.set_cols_width([9, 7, 19, 15, 12, 13, 8])
+    table.add_rows([["departure", "arrival", "duration of journey",
+                     "economy classic", "economy flex", "business flex", "currency"],
+                    ])
+    print table.draw()
+
     if not quotes_list_return:
-        print ('                                   {}'.format("outbound flight:"))
-        print (
-            '{}'.format("__________________________________________________________________________________________"))
-        print ('{}   {}   {}   {}   {}   {}'.format('departure',
-                                                    'arrival',
-                                                    'duration of journey',
-                                                    'Economy Classic',
-                                                    'Economy Flex',
-                                                    'Business Flex'))
         for quote_list in quotes_list_outbound:
-            print ('  {}      {}      {}            {}            {}            {}'.format(quote_list["departure"],
-                                                                                           quote_list['arrival'],
-                                                                                           quote_list[
-                                                                                               "duration of journey"],
-                                                                                           quote_list["price"][
-                                                                                               "price_eco"],
-                                                                                           quote_list["price"][
-                                                                                               "price_flex"],
-                                                                                           quote_list["price"][
-                                                                                               "price_business"]))
+            table = texttable.Texttable()
+            table.set_cols_align(["l", "r", "c"])
+            table.set_cols_valign(["t", "m", "b"])
+            table = texttable.Texttable()
+            table.set_deco(texttable.Texttable.HEADER)
+            table.set_cols_dtype(['t', 't', 't', 'a', 'a', 'a', 'a'])
+            table.set_cols_align(["c", "c", "c", "c", "c", "c", "c"])
+            table.set_cols_width([9, 7, 19, 15, 12, 13, 8])
+            table.add_rows([
+                [quote_list["departure"],
+                 quote_list["arrival"],
+                 quote_list["duration of journey"],
+                 quote_list["price"]["price_eco"],
+                 quote_list["price"]["price_flex"],
+                 quote_list["price"]["price_business"],
+                 quote_list["currency"][0]]])
+            print table.draw()
     else:
-        print ('                                   {}'.format("outbound flight:"))
-        print (
-            '{}'.format("__________________________________________________________________________________________"))
-        print ('{}   {}   {}   {}   {}   {}'.format('departure',
-                                                    'arrival',
-                                                    'duration of journey',
-                                                    'Economy Classic',
-                                                    'Economy Flex',
-                                                    'Business Flex'))
         for quote_list in quotes_list_outbound:
-            print ('  {}      {}      {}            {}            {}            {}'.format(quote_list["departure"],
-                                                                                           quote_list['arrival'],
-                                                                                           quote_list[
-                                                                                               "duration of journey"],
-                                                                                           quote_list["price"][
-                                                                                               "price_eco"],
-                                                                                           quote_list["price"][
-                                                                                               "price_flex"],
-                                                                                           quote_list["price"][
-                                                                                               "price_business"]))
-        print ('                                   {}'.format("return flight:"))
-        print (
-            '{}'.format("__________________________________________________________________________________________"))
+            table = texttable.Texttable()
+            table.set_cols_align(["l", "r", "c"])
+            table.set_cols_valign(["t", "m", "b"])
+            table = texttable.Texttable()
+            table.set_deco(texttable.Texttable.HEADER)
+            table.set_cols_dtype(['t', 't', 't', 'a', 'a', 'a', 'a'])
+            table.set_cols_align(["c", "c", "c", "c", "c", "c", "c"])
+            table.set_cols_width([9, 7, 19, 15, 12, 13, 8])
+            table.add_rows([
+                [quote_list["departure"],
+                 quote_list["arrival"],
+                 quote_list["duration of journey"],
+                 quote_list["price"]["price_eco"],
+                 quote_list["price"]["price_flex"],
+                 quote_list["price"]["price_business"],
+                 quote_list["currency"][0]]])
+            print table.draw()
+        table = texttable.Texttable()
+        table.set_cols_align(["l", "r", "c"])
+        table.set_cols_valign(["t", "m", "b"])
+        table = texttable.Texttable()
+        table.set_deco(texttable.Texttable.HEADER)
+        table.set_cols_dtype(['t', 't', 't', 'a', 'a', 'a', 'a'])
+        table.set_cols_align(["c", "c", "c", "c", "c", "c", "c"])
+        table.set_cols_width([9, 7, 19, 15, 12, 13, 8])
+        table.add_rows([["departure", "arrival", "duration of journey",
+                         "economy classic", "economy flex", "business flex", "currency"],
+                        ])
+        print table.draw()
         for quote_list in quotes_list_return:
-            print ('  {}      {}      {}            {}            {}            {}'.format(quote_list["departure"],
-                                                                                           quote_list['arrival'],
-                                                                                           quote_list[
-                                                                                               "duration of journey"],
-                                                                                           quote_list["price"][
-                                                                                               "price_eco"],
-                                                                                           quote_list["price"][
-                                                                                               "price_flex"],
-                                                                                           quote_list["price"][
-                                                                                               "price_business"]))
+            table = texttable.Texttable()
+            table.set_cols_align(["l", "r", "c"])
+            table.set_cols_valign(["t", "m", "b"])
+            table = texttable.Texttable()
+            table.set_deco(texttable.Texttable.HEADER)
+            table.set_cols_dtype(['t', 't', 't', 'a', 'a', 'a', 'a'])
+            table.set_cols_align(["c", "c", "c", "c", "c", "c", "c"])
+            table.set_cols_width([9, 7, 19, 15, 12, 13, 8])
+            table.add_rows([
+                [quote_list["departure"],
+                 quote_list["arrival"],
+                 quote_list["duration of journey"],
+                 quote_list["price"]["price_eco"],
+                 quote_list["price"]["price_flex"],
+                 quote_list["price"]["price_business"],
+                 quote_list["currency"][0]]])
+            print table.draw()
 
 
 if __name__ == '__main__':
