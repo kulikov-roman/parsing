@@ -12,8 +12,8 @@ def scrape():
     parser = create_parser()
     namespace = parser.parse_args()
     validation(namespace)
-    res = get_res(namespace)
-    parse_responce(res)
+    response = get_res(namespace)
+    parse_responce(response)
 
 
 def create_parser():
@@ -49,31 +49,35 @@ def validation(namespace):
 
 def get_res(namespace):
     url = 'https://www.flyniki.com/en/booking/flight/vacancy.php'
-    data_res = {'_ajax[templates][]': ('main',
-                                       'priceoverview',
-                                       'infos',
-                                       'flightinfo'),
-                '_ajax[requestParams][departure]': namespace.departure.upper(),
-                '_ajax[requestParams][destination]': namespace.destination.upper(),
-                '_ajax[requestParams][outboundDate]': namespace.outboundDate.strftime('%Y-%m-%d'),
-                '_ajax[requestParams][returnDate]': namespace.returnDate,
-                '_ajax[requestParams][oneway]': ''}
-    data_req = {'departure': namespace.departure.upper(),
-                'outboundDate': namespace.outboundDate.strftime('%Y-%m-%d'),
-                'returnDate': namespace.returnDate,
-                'oneway': '',
-                'adultCount': '1'}
-    print data_req['outboundDate']
+    data_get_response = {'_ajax[templates][]': ('main',
+                                                'priceoverview',
+                                                'infos',
+                                                'flightinfo'),
+                         '_ajax[requestParams][departure]': namespace.departure.upper(),
+                         '_ajax[requestParams][destination]': namespace.destination.upper(),
+                         '_ajax[requestParams][outboundDate]': namespace.outboundDate.strftime('%Y-%m-%d'),
+                         '_ajax[requestParams][returnDate]': namespace.returnDate,
+                         '_ajax[requestParams][oneway]': ''}
+    data_request = {'departure': namespace.departure.upper(),
+                    'outboundDate': namespace.outboundDate.strftime('%Y-%m-%d'),
+                    'returnDate': namespace.returnDate,
+                    'oneway': '',
+                    'adultCount': '1'}
+    print data_request['outboundDate']
     if not namespace.returnDate:
-        data_req['returnDate'] = namespace.outboundDate.strftime('%Y-%m-%d')
-        data_req['oneway'] = 'on'
-        data_res['_ajax[requestParams][returnDate]'] = namespace.outboundDate.strftime('%Y-%m-%d')
-        data_res['_ajax[requestParams][oneway]'] = 'on'
-    ses = requests.Session()
-    ses_req = ses.post(url, data=data_req, verify=False)
-    ses_res = ses.post(ses_req.url, data=data_res, verify=False)
-    res = (ses_res.json().get('templates').get('main'))
-    return res
+        data_request['returnDate'] = namespace.outboundDate.strftime('%Y-%m-%d')
+        data_request['oneway'] = 'on'
+        data_get_response['_ajax[requestParams][returnDate]'] = namespace.outboundDate.strftime('%Y-%m-%d')
+        data_get_response['_ajax[requestParams][oneway]'] = 'on'
+    session = requests.Session()
+    session_request = session.post(url, data=data_request, verify=False)
+    get_response = session.post(session_request.url, data=data_get_response, verify=False)
+    response = (get_response.json())
+    if 'templates' in response:
+        return response.get('templates').get('main')
+    else:
+        print "Flights not found"
+        sys.exit()
 
 
 def parse_responce(res):
@@ -134,7 +138,6 @@ def parse_responce(res):
 
     if not quotes_list_return:
         table = texttable.Texttable()
-        table.set_deco(texttable.Texttable.HEADER)
         table.set_cols_dtype(['t', 't', 't', 'a', 'a', 'a', 'a'])
         table.set_cols_align(["c", "c", "c", "c", "c", "c", "c"])
         table.set_cols_width([9, 7, 19, 15, 12, 13, 8])
@@ -148,10 +151,6 @@ def parse_responce(res):
         print table.draw()
         for quote_list in quotes_list_outbound:
             table = texttable.Texttable()
-            table.set_cols_align(["l", "r", "c"])
-            table.set_cols_valign(["t", "m", "b"])
-            table = texttable.Texttable()
-            table.set_deco(texttable.Texttable.HEADER)
             table.set_cols_dtype(['t', 't', 't', 'a', 'a', 'a', 'a'])
             table.set_cols_align(["c", "c", "c", "c", "c", "c", "c"])
             table.set_cols_width([9, 7, 19, 15, 12, 13, 8])
@@ -164,36 +163,24 @@ def parse_responce(res):
                              quote_list["currency"][0]]])
             print table.draw()
     else:
-        table = texttable.Texttable()
-        table.set_cols_dtype(['t', 't', 't', 'a', 'a', 'a', 'a'])
-        table.set_cols_align(["c", "c", "c", "c", "c", "c", "c"])
-        table.set_cols_width([9, 7, 19, 15, 12, 13, 8])
-        table.add_rows([["departure",
-                         "arrival",
-                         "duration of journey",
-                         "economy classic",
-                         "economy flex",
-                         "business flex",
-                         "currency"], ])
-        print table.draw()
         for quote_list_outbound in quotes_list_outbound:
             for quote_list_return in quotes_list_return:
                 sum_classic = 0
                 sum_flex = 0
                 sum_business = 0
-                quotes = {'departure_return': quote_list_return['departure'],
-                          'arrival_return': quote_list_return['arrival'],
-                          'duration_of_journey_return': quote_list_return['duration of journey'],
-                          'price_return': {'price_eco': quote_list_return['price']['price_eco'],
-                                           'price_flex': quote_list_return['price']['price_flex'],
-                                           'business_flex': quote_list_return['price']['price_business']},
-                          'departure_outbound': quote_list_outbound['departure'],
-                          'arrival_outbound': quote_list_outbound['arrival'],
-                          'duration_of_journey_outbound': quote_list_outbound['duration of journey'],
+                quotes = {'departure_outbound': quote_list_return['departure'],
+                          'arrival_outbound': quote_list_return['arrival'],
+                          'duration_of_journey_outbound': quote_list_return['duration of journey'],
+                          'price_outbound': {'price_eco': quote_list_return['price']['price_eco'],
+                                             'price_flex': quote_list_return['price']['price_flex'],
+                                             'business_flex': quote_list_return['price']['price_business']},
+                          'departure_return': quote_list_outbound['departure'],
+                          'arrival_return': quote_list_outbound['arrival'],
+                          'duration_of_journey_return': quote_list_outbound['duration of journey'],
                           'currency': quote_list_outbound['currency'],
-                          'price_outbound': {'price_eco': quote_list_outbound['price']['price_eco'],
-                                             'price_flex': quote_list_outbound['price']['price_flex'],
-                                             'business_flex': quote_list_outbound['price']['price_business']},
+                          'price_return': {'price_eco': quote_list_outbound['price']['price_eco'],
+                                           'price_flex': quote_list_outbound['price']['price_flex'],
+                                           'business_flex': quote_list_outbound['price']['price_business']},
                           'amount_classic': sum_classic,
                           'amount_flex': sum_flex,
                           'amount_business': sum_business}
@@ -209,15 +196,20 @@ def parse_responce(res):
                     sum_business = price_business_outbound + price_business_return
                     quotes['amount_business'] = sum_business
                 quotes_sum.append(quotes)
+        sorted(quotes_sum, 'amount_classic')
         for quote_sum in quotes_sum:
-            table = texttable.Texttable()
-            table.set_cols_align(["l", "r", "c"])
-            table.set_cols_valign(["t", "m", "b"])
             table = texttable.Texttable()
             table.set_cols_dtype(['t', 't', 't', 'a', 'a', 'a', 'a'])
             table.set_cols_align(["c", "c", "c", "c", "c", "c", "c"])
             table.set_cols_width([9, 7, 19, 15, 12, 13, 8])
-            table.add_rows([[quote_sum["departure_outbound"],
+            table.add_rows([["departure",
+                             "arrival",
+                             "duration of journey",
+                             "economy classic",
+                             "economy flex",
+                             "business flex",
+                             "currency"],
+                            [quote_sum["departure_outbound"],
                              quote_sum["arrival_outbound"],
                              quote_sum["duration_of_journey_outbound"],
                              quote_sum["price_outbound"]["price_eco"],
@@ -230,10 +222,18 @@ def parse_responce(res):
                              quote_sum["price_return"]["price_eco"],
                              quote_sum["price_return"]["price_flex"],
                              quote_sum["price_return"]["business_flex"],
+                             quote_sum["currency"][0]],
+                            ["",
+                             "",
+                             "the amount:",
+                             quote_sum["amount_classic"],
+                             quote_sum["amount_flex"],
+                             quote_sum["amount_business"],
                              quote_sum["currency"][0]]])
-            print table.draw()
+            print table.draw() + "\n"
 
 
 if __name__ == '__main__':
     scrape()
+
 
