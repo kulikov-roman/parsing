@@ -159,52 +159,38 @@ def create_leg(info, fare, currency):
 
 def print_result(quotes, one_way):
     """Print list of quotes as table"""
-    if one_way:
-        for quote_list in sorted(quotes, key=lambda d: d['total_price']):
-            table = texttable.Texttable()
-            table.set_cols_dtype(['t', 't', 't', 'a', 'a', 'a'])
-            table.set_cols_align(["c", "c", "c", "c", "c", "c"])
-            table.set_cols_width([9, 7, 19, 15, 12, 13])
-            table.add_rows([['departure',
-                             'arrival',
-                             'duration of journey',
-                             'class',
-                             'price',
-                             'currency'],
-                            [quote_list['outbound_leg']['departure'],
-                             quote_list['outbound_leg']['arrival'],
-                             quote_list["outbound_leg"]['flight_duration'],
-                             quote_list['outbound_leg']['class'],
-                             quote_list['total_price'],
-                             quote_list['outbound_leg']['currency']]])
-            print table.draw()
-    else:
-        for quote_list in sorted(quotes, key=lambda d: d['total_price']):
-            table = texttable.Texttable()
-            table.set_cols_dtype(['t', 't', 't', 'a', 'a', 'a'])
-            table.set_cols_align(["c", "c", "c", "c", "c", "c"])
-            table.set_cols_width([9, 7, 19, 15, 12, 13])
-            table.add_rows([['departure',
-                             'arrival',
-                             'duration of journey',
-                             'class',
-                             'price',
-                             'currency'],
-                            [quote_list['outbound_leg']['departure'],
-                             quote_list['outbound_leg']['arrival'],
-                             quote_list['outbound_leg']['flight_duration'],
-                             quote_list['outbound_leg']['class'],
-                             quote_list['outbound_leg']['price'],
-                             quote_list['outbound_leg']['currency']],
-                            [quote_list['inbound_leg']['departure'],
-                             quote_list['inbound_leg']['arrival'],
-                             quote_list['inbound_leg']['flight_duration'],
-                             quote_list['inbound_leg']['class'],
-                             quote_list['inbound_leg']['price'],
-                             quote_list['inbound_leg']['currency']],
-                            ['', '', '', 'Total amount:', quote_list['total_price'],
-                             quote_list['outbound_leg']['currency']]])
-            print table.draw() + '\n'
+    header_table = ('departure', 'arrival', 'duration of journey',
+                    'class', 'price', 'currency')
+
+    for quote_list in sorted(quotes, key=lambda d: d['total_price']):
+        table = make_table()
+        flight_row = [header_table, get_flight_row(quote_list, 'outbound_leg')]
+        if not one_way:
+            flight_row.extend([get_flight_row(quote_list, 'inbound_leg'),
+                               ['', '', '', 'Total amount:',
+                                quote_list['total_price'],
+                                quote_list['outbound_leg']['currency']]])
+        table.add_rows(flight_row)
+        print table.draw() + '\n'
+
+
+def make_table():
+    """Setting table for output"""
+    table = texttable.Texttable()
+    table.set_cols_dtype(['t', 't', 't', 'a', 'a', 'a'])
+    table.set_cols_align(["c", "c", "c", "c", "c", "c"])
+    table.set_cols_width([9, 7, 19, 15, 12, 13])
+    return table
+
+
+def get_flight_row(flight_dict, leg):
+    """Returns a list of values to substitute in the output"""
+    return [flight_dict[leg]['departure'],
+            flight_dict[leg]['arrival'],
+            flight_dict[leg]['flight_duration'],
+            flight_dict[leg]['class'],
+            flight_dict['total_price'],
+            flight_dict[leg]['currency']]
 
 
 if __name__ == '__main__':
